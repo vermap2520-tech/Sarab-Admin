@@ -1,11 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function UpdateProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
   const [product, setProduct] = useState({
     image: "",
@@ -13,15 +12,17 @@ export default function UpdateProduct() {
     description: "",
     category: "",
     price: "",
-    stock: "",
+    quantity: "",
     discount: "",
   });
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [image, setImage] = useState(null);
+  const [oldImage, setOldImage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    getProduct();
-  }, [id]);
+  // =========================
+  // GET SINGLE PRODUCT
+  // =========================
 
   const getProduct = async () => {
     try {
@@ -29,17 +30,46 @@ export default function UpdateProduct() {
         `http://localhost:5000/api/product/singleProduct/${id}`
       );
 
-      setProduct(res.data.data);
+      console.log("Product:", res.data);
+
+      const productData = res.data.data;
+
+      setProduct({
+        image: productData.image || "",
+        title: productData.title || "",
+        description: productData.description || "",
+        category: productData.category || "",
+        price: productData.price || "",
+        quantity: productData.quantity || "",
+        discount: productData.discount || "",
+      });
+
+      setOldImage(productData.image || "");
     } catch (error) {
-      console.log("Get Product Error:", error);
+      console.log(
+        "Get Product Error:",
+        error.response?.data || error.message
+      );
+
+      alert("Product data not found");
     }
   };
 
+  useEffect(() => {
+    getProduct();
+  }, []);
+
+  // =========================
+  // INPUT CHANGE
+  // =========================
+
   const handleChange = (e) => {
-    setProduct({
-      ...product,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setProduct((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // =========================
@@ -47,68 +77,84 @@ export default function UpdateProduct() {
   // =========================
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const selectedImage = e.target.files[0];
 
-    if (!file) return;
+    if (!selectedImage) {
+      return;
+    }
 
-    setSelectedImage(file);
+    // Image validation 
+    if (!selectedImage.type.startsWith("image/")) {
+      alert("Please select a valid image");
+      return;
+    }
 
-    // Preview selected image
-    const imageUrl = URL.createObjectURL(file);
-
-    setProduct({
-      ...product,
-      image: imageUrl,
-    });
-  };
-
-  const handleChangeImageClick = () => {
-    fileInputRef.current.click();
+    // 5 MB validation
+    // if (selectedImage.size > 5 * 1024 * 1024) {
+    //   alert("Image size must be less than 5MB");
+    //   return;
+    // }
+    console.log(selectedImage);
+    setImage(selectedImage);
   };
 
   // =========================
-  // SUBMIT
+  // UPDATE PRODUCT
   // =========================
 
-  const handleSubmit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
 
     try {
+      setLoading(true);
+
       const formData = new FormData();
 
       formData.append("title", product.title);
       formData.append("description", product.description);
       formData.append("category", product.category);
       formData.append("price", product.price);
-      formData.append("stock", product.stock);
+      formData.append("quantity", product.quantity);
       formData.append("discount", product.discount);
 
-      // Send new image only if selected
-      if (selectedImage) {
-        formData.append("image", selectedImage);
+      // New image only
+      if (image) {
+        formData.append("image", image);
       }
 
-      await axios.post(
+      // Check FormData
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const res = await axios.post(
         `http://localhost:5000/api/product/updateProduct/${id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
+      console.log("Update Response:", res.data);
+
       alert("Product Updated Successfully");
+
       navigate("/product");
     } catch (error) {
-      console.log("Update Product Error:", error);
-      alert("Failed to update product");
+      console.log(
+        "Update Product Error:",
+        error.response?.data || error.message
+      );
+
+      alert("Product update failed");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // IMAGE URL
+  const imagePreview = image ? URL.createObjectURL(image) : oldImage
+    ? `http://localhost:5000/image-uploads/${oldImage}` : "";
+
   return (
     <div className="update-product-page">
-
       {/* ================= HEADER ================= */}
 
       <div className="update-product-header">
@@ -128,67 +174,63 @@ export default function UpdateProduct() {
       {/* ================= CARD ================= */}
 
       <div className="update-product-card">
-
         <div className="form-header">
           <h2>Product Details</h2>
           <span>Product #{id}</span>
         </div>
 
-        <form className="update-form" onSubmit={handleSubmit}>
-
+        <form
+          className="update-form"
+          onSubmit={handleUpdate}
+        >
           {/* ================= IMAGE ================= */}
 
           <div className="form-group full-width">
-
             <label>Product Image</label>
 
             <div className="image-section">
-
               <div className="image-preview">
-
-                {product.image ? (
+                {imagePreview ? (
                   <img
-                    src={`http://localhost:5000/image-uploads/${product.image}`}
+                    src={imagePreview}
                     alt={product.title || "Product"}
                   />
                 ) : (
                   <span>No Image</span>
                 )}
-
               </div>
 
               <div className="image-actions">
-
-                {/* Hidden File Input */}
-
                 <input
-                  ref={fileInputRef}
+                  id="productImage"
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
                   style={{ display: "none" }}
                 />
 
-                {/* Change Image Button */}
-
-                <button
-                  type="button"
+                <label
+                  htmlFor="productImage"
                   className="change-image-btn"
-                  onClick={handleChangeImageClick}
+                  style={{
+                    cursor: "pointer",
+                    display: "inline-block",
+                  }}
                 >
                   📷 Change Image
-                </button>
+                </label>
 
-                <p>
+                {image && (
+                  <p>Selected : <strong>{image.name}</strong></p>
+                )}
+
+                {/* <p>
                   JPG, PNG or WEBP
                   <br />
                   Maximum size: 5MB
-                </p>
-
+                </p> */}
               </div>
-
             </div>
-
           </div>
 
           {/* ================= PRODUCT NAME ================= */}
@@ -232,6 +274,7 @@ export default function UpdateProduct() {
               placeholder="Enter price"
               value={product.price}
               onChange={handleChange}
+              min="0"
               required
             />
           </div>
@@ -239,28 +282,28 @@ export default function UpdateProduct() {
           {/* ================= DISCOUNT ================= */}
 
           <div className="form-group">
-            <label>Discount Price </label>
-
-            <input
-              type="string"
-              name="discount price"
-              placeholder="Enter discount price"
-              value={product.discount}
-              onChange={handleChange}
-            // min="0"
-            />
-          </div>
-
-          {/* ================= STOCK ================= */}
-
-          <div className="form-group">
-            <label>Stock</label>
+            <label>Discount Price</label>
 
             <input
               type="number"
-              name="stock"
-              placeholder="Enter stock quantity"
-              value={product.stock}
+              name="discount"
+              placeholder="Enter discount price"
+              value={product.discount}
+              onChange={handleChange}
+              min="0"
+            />
+          </div>
+
+          {/* ================= QUANTITY ================= */}
+
+          <div className="form-group">
+            <label>Quantity</label>
+
+            <input
+              type="number"
+              name="quantity"
+              placeholder="Enter quantity"
+              value={product.quantity}
               onChange={handleChange}
               min="0"
             />
@@ -283,11 +326,11 @@ export default function UpdateProduct() {
           {/* ================= BUTTONS ================= */}
 
           <div className="form-actions full-width">
-
             <button
               type="button"
               className="cancel-btn"
               onClick={() => navigate("/product")}
+              disabled={loading}
             >
               Cancel
             </button>
@@ -295,12 +338,11 @@ export default function UpdateProduct() {
             <button
               type="submit"
               className="update-btn"
+              disabled={loading}
             >
-              Update Product
+              {loading ? "Updating..." : "Update Product"}
             </button>
-
           </div>
-
         </form>
       </div>
     </div>

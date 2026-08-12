@@ -13,23 +13,35 @@ export default function Products() {
 
   const getProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/product/all");
+      const res = await axios.get(
+        "http://localhost:5000/api/product/all"
+      );
 
-      setProducts(res.data.data);
+      setProducts(res.data.data || []);
     } catch (error) {
-      console.log(error);
+      console.log(
+        "Get Products Error:",
+        error.response?.data || error.message
+      );
     }
   };
 
   const deleteProduct = async (id) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/product/deleteProduct/${id}`,
+        `http://localhost:5000/api/product/deleteProduct/${id}`
       );
+
       alert("Product deleted successfully");
+
       getProducts();
     } catch (error) {
-      console.log(error);
+      console.log(
+        "Delete Product Error:",
+        error.response?.data || error.message
+      );
+
+      alert("Product delete failed");
     }
   };
 
@@ -38,7 +50,10 @@ export default function Products() {
       <div className="products-header">
         <h2>Products List</h2>
 
-        <button className="add-btn" onClick={() => navigate("/add")}>
+        <button
+          className="add-btn"
+          onClick={() => navigate("/add")}
+        >
           Add Product
         </button>
       </div>
@@ -51,7 +66,7 @@ export default function Products() {
             <th>Description</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Stock</th>
+            <th>Quantity</th>
             <th>Discount Price</th>
             <th>View</th>
             <th>Update</th>
@@ -60,50 +75,71 @@ export default function Products() {
         </thead>
 
         <tbody>
-          {products.map((product) => (
-            <tr key={product._id}>
-              <td>
-                <img
-                  src={`http://localhost:5000/image-uploads/${product.image}`}
-                  alt={product.title}
-                  width="50px"
-                />
-              </td>
-              <td>{product.title}</td>
-              <td>{product.description}</td>
-              <td>{product.category}</td>
-              <td> $ {product.price}</td>
-              <td>{product.stock}</td>
-              <td> $ {product.discount}</td>
+          {products.length > 0 ? (
+            products.map((product) => (
+              <tr key={product._id}>
+                <td>
+                  {product.image ? (
+                    <img
+                      src={`http://localhost:5000/image-uploads/${product.image}`}
+                      alt={product.title}
+                      width="50"
+                      height="50"
+                    />
+                  ) : (
+                    "No image"
+                  )}
+                </td>
 
-              <td>
-                <button
-                  className="view-btns"
-                  onClick={() => navigate(`/viewProduct/${product._id}`)}
-                >
-                  View
-                </button>
-              </td>
+                <td>{product.title}</td>
 
-              <td>
-                <button
-                  className="update-btns"
-                  onClick={() => navigate(`/updateProduct/${product._id}`)}
-                >
-                  Update
-                </button>
-              </td>
+                <td>{product.description}</td>
 
-              <td>
-                <button
-                  className="delete-btns"
-                  onClick={() => deleteProduct(product._id)}
-                >
-                  Delete
-                </button>
-              </td>
+                <td>{product.category}</td>
+
+                <td>$ {product.price}</td>
+
+                <td>{product.quantity}</td>
+
+                <td>$ {product.discount}</td>
+
+                <td>
+                  <button
+                    className="view-btns"
+                    onClick={() =>
+                      navigate(`/viewProduct/${product._id}`)
+                    }
+                  >
+                    View
+                  </button>
+                </td>
+
+                <td>
+                  <button
+                    className="update-btns"
+                    onClick={() =>
+                      navigate(`/updateProduct/${product._id}`)
+                    }
+                  >
+                    Update
+                  </button>
+                </td>
+
+                <td>
+                  <button
+                    className="delete-btns"
+                    onClick={() => deleteProduct(product._id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="10">No products found</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
