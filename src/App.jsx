@@ -15,6 +15,7 @@ import UpdateUser from "./Pages/UpdateUser";
 import AddProduct from "./Components/addProduct";
 import Reservation from "./Pages/Reservation";
 import AddReservation from "./Components/addReservation";
+import AddAdmin from "./Components/addAdmin";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="product" element={<Products />} />
             <Route path="viewProduct/:id" element={<ViewProduct />} />
             <Route path="updateProduct/:id" element={<UpdateProduct />} />
+            <Route path="add" element={<AddProduct />} />
 
             <Route path="users" element={<Users />} />
             <Route path="view/:id" element={<ViewUser />} />
@@ -36,8 +38,7 @@ function App() {
             <Route path="admins" element={<Admins />} />
             <Route path="viewAdmin/:id" element={<ViewAdmin />} />
             <Route path="updateAdmin/:id" element={<UpdateAdmin />} />
-
-            <Route path="add" element={<AddProduct />} />
+            <Route path="addAdmin" element={<AddAdmin />} />
 
             <Route path="reservation" element={<Reservation />} />
             <Route path="reservation/add" element={<AddReservation />} />

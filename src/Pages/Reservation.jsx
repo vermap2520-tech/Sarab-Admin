@@ -190,7 +190,7 @@ export default function Reservation() {
                                             </button>
 
                                             <button
-                                                className="edit-btn"
+                                                className="edit-bttn"
                                                 title="Edit"
                                                 onClick={() =>
                                                     navigate(

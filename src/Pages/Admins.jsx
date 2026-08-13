@@ -6,17 +6,17 @@ export default function Admins() {
   const navigate = useNavigate();
 
   const [admins, setAdmins] = useState([]);
-  // console.log(admins);
 
+  // get all admins
   const getAdmins = async () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/admin/getAllAdmins",
       );
-      console.log(res.data);
+      console.log("Admins Response:", res.data);
       setAdmins(res.data.data);
     } catch (error) {
-      console.log(error.res?.data || error.message);
+      console.log(error.response?.data || error.message);
     }
   };
 
@@ -29,9 +29,8 @@ export default function Admins() {
       await axios.delete(`http://localhost:5000/api/admin/deleteAdmin/${id}`);
       alert("Admin deleted successfully");
       getAdmins();
-      // setAdmins(admins.filter((admin) => admin._id !== id));
     } catch (error) {
-      console.log(error.res?.data || error.message);
+      console.log(error.response?.data || error.message);
       alert("Error in deleting admin");
     }
   };
@@ -40,7 +39,7 @@ export default function Admins() {
     <div className="admins">
       <div className="admins-header">
         <h2>Admins Lists</h2>
-        <button className="add-btn" onClick={() => navigate("/registerAdmin")}>
+        <button className="add-btn" onClick={() => navigate("/addAdmin")}>
           Add Admin
         </button>
       </div>
@@ -70,6 +69,7 @@ export default function Admins() {
                       width: "50px",
                       height: "50px",
                       borderRadius: "50%",
+                      objectFit: "cover",
                     }}
                   />
                 ) : (
