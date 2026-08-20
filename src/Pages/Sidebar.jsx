@@ -6,6 +6,7 @@ import {
     FaShoppingCart,
     FaCog,
     FaCalendarAlt,
+    FaPhone,
 } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import "../App.css";
@@ -35,6 +36,11 @@ const menu = [
         name: "Reservation",
         path: "/reservation",
         icon: <FaCalendarAlt />
+    },
+    {
+        name: "Contact",
+        path: "/contacts",
+        icon: <FaPhone />
     },
     {
         name: "Orders",

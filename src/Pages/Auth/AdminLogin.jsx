@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../api/api";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -24,18 +25,21 @@ export default function AdminLogin() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/admin/adminLogin",
-        // "https://sarab-admin.vercel.app/adminlogin",
-        {
-          email: admin.email,
-          password: admin.password,
-        }
-      );
+      const res = await api.post("/api/admin/adminLogin", admin)
+
+      // const res = await axios.post(
+      //   "http://localhost:5000/api/admin/adminLogin",
+      //   // "https://sarab-admin.vercel.app/adminlogin",
+      //   {
+      //     email: admin.email,
+      //     password: admin.password,
+      //   }
+      // );
 
       console.log(res.data);
+      localStorage.setItem("key", JSON.stringify(res.data.admin))
       alert("Admin Logged in Successfully!");
-      navigate("/admins");
+      navigate("/");
     } catch (error) {
       console.error(error.response?.data || error.message);
       alert("Error in logging in admin");

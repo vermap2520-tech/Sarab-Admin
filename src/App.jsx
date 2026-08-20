@@ -16,6 +16,7 @@ import AddProduct from "./Components/addProduct";
 import Reservation from "./Pages/Reservation";
 import AddReservation from "./Components/addReservation";
 import AddAdmin from "./Components/addAdmin";
+import Contacts from "./Pages/Contacts";
 
 function App() {
   return (
@@ -42,6 +43,8 @@ function App() {
 
             <Route path="reservation" element={<Reservation />} />
             <Route path="reservation/add" element={<AddReservation />} />
+
+            <Route path="/contacts" element={<Contacts />} />
           </Route>
         </Routes>
       </BrowserRouter>
